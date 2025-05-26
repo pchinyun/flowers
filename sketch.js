@@ -1,153 +1,89 @@
 let mic, amplitude;
+let flower;
 let particles = [];
-
-
-
-let flower; 
+let threshold = 0.05;
 
 function preload() {
-  flower = loadModel('./strangeFlower.obj', true); 
-  petal = loadModel('./petal.obj', true); 
+  flower = loadModel('./strangeFlower.obj', true);
 }
-particles = []
-
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
-  background(0);
+  createCanvas(windowWidth, windowHeight, WEBGL);
+  angleMode(DEGREES);
 
   mic = new p5.AudioIn();
   amplitude = new p5.Amplitude();
-
-  // Wait for user gesture to start audio
   userStartAudio();
   mic.start();
   amplitude.setInput(mic);
-
-  // create particles
-  for (let i = 0; i < 100; i++) {
-    particles.push(new Particle(random(width), random(height)));
-  }
-  createCanvas(windowWidth, windowHeight, WEBGL);
-  angleMode(DEGREES); 
 }
 
 function draw() {
-  background(0, 20); // slight trail effect
+  background(0);
+  directionalLight(255, 255, 255, 0, 0, -1);
+  ambientLight(100);
+
   let level = amplitude.getLevel();
+  let boostedLevel = level * 5; 
+  // console.log("Boosted Level:", boostedLevel);
 
-  console.log(level);
+  
+  rotateX(frameCount * 0.2);
+  rotateY(frameCount * 0.3);
 
-  for (let p of particles) {
-    p.update();
-    p.display(level);
+  // When audio is detected above threshold, spawn rotating flowers
+  if (boostedLevel > threshold && random(1) > 0.8) {
+    let x = random(-200, 200);
+    let y = random(-200, 200);
+    let z = random(-200, 200);
+    let pos = createVector(x, y, z);
+
+    particles.push(new FlowerParticle(pos));
+  }
+
+  
+  for (let i = particles.length - 1; i >= 0; i--) {
+    particles[i].update();
+    particles[i].display();
+
+    if (particles[i].isOffscreen()) {
+      particles.splice(i, 1);
+    }
   }
 }
 
-class Particle {
-  constructor(x, y) {
-    this.pos = createVector(x, y);
-    this.vel = p5.Vector.random2D().mult(random(0.5, 2));
-    this.size = random(2, 5);
-    this.baseSize = this.size;
+// Flower Particle class
+class FlowerParticle {
+  constructor(pos) {
+    this.pos = pos.copy();
+    this.vel = p5.Vector.random3D().mult(random(1, 3));
+    this.rot = createVector(random(360), random(360), random(360));
+    this.rotSpeed = createVector(random(0.5, 1.5), random(0.5, 1.5), random(0.5, 1.5));
+    this.scale = random(0.4, 1.2);
   }
 
   update() {
     this.pos.add(this.vel);
-
-    // bounce off edges
-    if (this.pos.x < 0 || this.pos.x > width) this.vel.x *= -1;
-    if (this.pos.y < 0 || this.pos.y > height) this.vel.y *= -1;
+    this.rot.add(this.rotSpeed);
   }
 
-  display(volume) {
-    let volSize = map(volume, 0, 0.1, 0, 50, true);
-    let petalLength = this.baseSize + volSize;
-    let petalWidth = petalLength * 0.4;
-    let petalCount = 6;
-  
+  display() {
     push();
-    translate(this.pos.x, this.pos.y);
-    noStroke();
-    fill(255, 100, 200, 180);
-  
-    for (let i = 0; i < petalCount; i++) {
-      rotate(TWO_PI / petalCount);
-      ellipse(0, petalLength / 2, petalWidth, petalLength);
-    }
-  
+    translate(this.pos.x, this.pos.y, this.pos.z);
+    rotateX(this.rot.x);
+    rotateY(this.rot.y);
+    rotateZ(this.rot.z);
+    scale(this.scale);
+    normalMaterial();
+    model(flower);
     pop();
   }
-}  
 
-  background(0,0,30);
-
-  rotateX(sin (frameCount / 12)* 360)
-  rotateY(sin(frameCount / 4) * 360)
-
-  translate(0,0, sin(frameCount) * 100)
-
-  directionalLight([255], createVector(0,0,-10))
-
-  if(random(1) > 0.97) {
-    let x = random(-100,100)
-    let y = random(-100,100)
-    let z = random(-100,100)
-
-    let pos = createVector(x,y,z)
-
-    for (let i=0; i<10; i++) { 
-      let r = map(sin(frameCount), -1,1,0,255) + random (-50,50)
-      let g = map(sin(frameCount/2), -1, 1, 255,0) + random (-50,50)
-      let b = map(sin (frameCount /4), -1,1,0,255) + random (-50,50)
-
-      let c = color(r,g,b)
-
-      let p = new Particle(pos, c)
-      particles.push(p)
-    }
-  }
-  
-  for (let i = particles.length - 1; i >= 0; i--) { 
-      if (dist(particles[i].pos.x, particles[i].pos.y, particles[i].pos.z, 0,0,0) < 500) {
-      particles[i].update()
-      particles[i].show()
-    }
-   else { 
-    particles.splice(i,1);
-    }
-  }
-}
-
-class Particle { 
-  constructor(pos, c) { 
-    this.pos = createVector(pos.x,pos.y,pos.z);
-    this.vel = p5.Vector.random3D().normalize().mult(random(4,6))
-
-    this.c = c
-    this.w = random(4,10)
-  }
-  update() {
-    this.pos.add(this.vel)
-  }
-  show() {
-    push()
-
-    noStroke()
-    fill(this.c)
-
-    translate(this.pos.x, this.pos.y, this.pos.z)
-
-    rotateZ(PI);
-    normalMaterial(); 
-    model(flower); 
-   
-
-
-    pop()
+  isOffscreen() {
+    return this.pos.mag() > 800; 
   }
 }
 
 
-
+ 
 
