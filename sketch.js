@@ -640,7 +640,7 @@
 let mic, amplitude;
 let flower;
 let particles = [];
-let threshold = 0.15;
+let threshold = 0.1;
 let showParticles = true;
 
 let myRec = new p5.SpeechRec();
