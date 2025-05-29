@@ -640,7 +640,7 @@
 let mic, amplitude;
 let flower;
 let particles = [];
-let threshold = 0.05;
+let threshold = 0.15;
 let showParticles = true;
 
 let myRec = new p5.SpeechRec();
@@ -729,7 +729,7 @@ function draw() {
       console.log("Heard:", myRec.resultString)
     }
 
-    if (!dragonPlaying && !videoJustEnded && boostedLevel > 10) { //THISSSSSSSS///// 
+    if (!dragonPlaying && !videoJustEnded && boostedLevel > 30) { //THISSSSSSSS///// 
       triggerDragonVideo();
     }
 
