@@ -636,7 +636,7 @@
 
 
 
-//------------------------- adding the video in ----------------------
+//------------------------- adding the video in use this!!!!!!!!----------------------
 let mic, amplitude;
 let flower;
 let particles = [];
@@ -729,7 +729,7 @@ function draw() {
       console.log("Heard:", myRec.resultString)
     }
 
-    if (!dragonPlaying && !videoJustEnded && boostedLevel > 30) { //THISSSSSSSS///// 
+    if (!dragonPlaying && !videoJustEnded && boostedLevel > 4) { //THISSSSSSSS///// 
       triggerDragonVideo();
     }
 
